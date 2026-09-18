@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}RDIS - Evaluation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Model Evaluation</h1>
+    <p class="subtitle">Detection metrics: Precision, Recall, mAP</p>
+</div>
+
+<div id="eval-loading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading evaluation results...</p>
+</div>
+
+<div id="eval-not-run" class="empty-state-large" style="display:none;">
+    <div class="empty-icon">📋</div>
+    <h3>Evaluation Not Yet Executed</h3>
+    <p>Run <code>python scripts/evaluate_model.py</code> to evaluate the model and generate metrics.</p>
+    <p>Results will appear here once evaluation is complete.</p>
+</div>
+
+<div id="eval-content" style="display:none;">
+    <div class="summary-cards" id="eval-cards"></div>
+
+    <div class="eval-details" id="eval-details"></div>
+
+    <div id="per-class-section" style="display:none;">
+        <h2>Per-Class Metrics</h2>
+        <table class="data-table" id="per-class-table">
+            <thead><tr><th>Class</th><th>mAP@0.5:0.95</th></tr></thead>
+            <tbody id="per-class-body"></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', loadEvaluation);
+
+    async function loadEvaluation() {
+        try {
+            const response = await fetch('/api/evaluation');
+            const data = await response.json();
+            document.getElementById('eval-loading').style.display = 'none';
+
+            if (data.status === 'not_executed') {
+                document.getElementById('eval-not-run').style.display = 'block';
+                return;
+            }
+
+            const m = data.metrics || {};
+            document.getElementById('eval-cards').innerHTML = `
+                <div class="summary-card"><div class="summary-value">${(m.precision * 100 || 0).toFixed(1)}%</div><div class="summary-label">Precision</div></div>
+                <div class="summary-card"><div class="summary-value">${(m.recall * 100 || 0).toFixed(1)}%</div><div class="summary-label">Recall</div></div>
+                <div class="summary-card"><div class="summary-value">${(m.map50 * 100 || 0).toFixed(1)}%</div><div class="summary-label">mAP@0.5</div></div>
+                <div class="summary-card"><div class="summary-value">${(m.map50_95 * 100 || 0).toFixed(1)}%</div><div class="summary-label">mAP@0.5:0.95</div></div>
+                <div class="summary-card"><div class="summary-value">${data.evaluation_time_seconds.toFixed(1)}s</div><div class="summary-label">Evaluation Time</div></div>
+            `;
+
+            document.getElementById('eval-details').innerHTML = `
+                <p><strong>Model:</strong> ${data.model_path}</p>
+                <p><strong>Dataset:</strong> ${data.dataset}</p>
+                <p><strong>Image Size:</strong> ${data.image_size}px</p>
+                <p><strong>Device:</strong> ${data.device}</p>
+            `;
+
+            const perClass = data.per_class || {};
+            if (Object.keys(perClass).length > 0) {
+                const tbody = document.getElementById('per-class-body');
+                tbody.innerHTML = '';
+                Object.entries(perClass).forEach(([cls, metrics]) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${cls}</td><td>${(metrics.map50_95 * 100).toFixed(1)}%</td>`;
+                    tbody.appendChild(row);
+                });
+                document.getElementById('per-class-section').style.display = 'block';
+            }
+
+            document.getElementById('eval-content').style.display = 'block';
+        } catch (err) {
+            document.getElementById('eval-loading').innerHTML = '<p class="error-message">Failed to load evaluation results.</p>';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}RDIS - Image Analysis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Image Analysis</h1>
+    <p class="subtitle">Upload a road image for damage detection</p>
+</div>
+
+<div class="analysis-container">
+    <div class="upload-section">
+        <div class="upload-area" id="upload-area">
+            <div class="upload-icon">📸</div>
+            <p>Drag & drop an image here or click to browse</p>
+            <p class="upload-hint">Supported: JPG, JPEG, PNG, BMP, TIFF (max 20MB)</p>
+            <input type="file" id="image-input" accept=".jpg,.jpeg,.png,.bmp,.tiff" hidden>
+        </div>
+        <div id="preview-container" class="preview-container" style="display:none;">
+            <img id="preview-image" class="preview-image" alt="Preview">
+            <button class="btn btn-primary" id="analyze-btn" onclick="analyzeImage()">
+                🔍 Analyze Image
+            </button>
+        </div>
+    </div>
+
+    <div id="loading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+        <p>Analyzing image for road damage...</p>
+    </div>
+
+    <div id="results" class="results-section" style="display:none;">
+        <h2>Analysis Results</h2>
+        <div class="results-summary" id="results-summary"></div>
+
+        <div class="results-images">
+            <div class="result-image-box">
+                <h3>Original</h3>
+                <img id="original-result" class="result-image" alt="Original image">
+            </div>
+            <div class="result-image-box">
+                <h3>Annotated</h3>
+                <img id="annotated-result" class="result-image" alt="Annotated image">
+            </div>
+        </div>
+
+        <div id="detections-table-container">
+            <h3>Detection Details</h3>
+            <table class="data-table" id="detections-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Damage Type</th>
+                        <th>Code</th>
+                        <th>Confidence</th>
+                        <th>Severity</th>
+                        <th>Bounding Box</th>
+                    </tr>
+                </thead>
+                <tbody id="detections-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="error-message" class="error-message" style="display:none;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Drag & drop and file input handling
+    const uploadArea = document.getElementById('upload-area');
+    const imageInput = document.getElementById('image-input');
+    let selectedFile = null;
+
+    uploadArea.addEventListener('click', () => imageInput.click());
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+    });
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('drag-over');
+    });
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        if (e.dataTransfer.files.length > 0) {
+            handleFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFile(e.target.files[0]);
+        }
+    });
+
+    function handleFile(file) {
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('preview-image').src = e.target.result;
+            document.getElementById('preview-container').style.display = 'block';
+            uploadArea.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function analyzeImage() {
+        if (!selectedFile) return;
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('error-message').style.display = 'none';
+        document.getElementById('analyze-btn').disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+            const response = await fetch('/api/analyze/image', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Analysis failed');
+            }
+
+            displayImageResults(data);
+        } catch (err) {
+            document.getElementById('error-message').textContent = err.message;
+            document.getElementById('error-message').style.display = 'block';
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('analyze-btn').disabled = false;
+        }
+    }
+
+    function displayImageResults(data) {
+        // Summary
+        const summary = document.getElementById('results-summary');
+        summary.innerHTML = `
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-value">${data.total_detections}</div>
+                    <div class="summary-label">Detections</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value">${(data.processing_time * 1000).toFixed(0)}ms</div>
+                    <div class="summary-label">Processing Time</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value">${data.image_width}x${data.image_height}</div>
+                    <div class="summary-label">Resolution</div>
+                </div>
+            </div>
+        `;
+
+        // Images
+        document.getElementById('original-result').src = data.original_image_url;
+        document.getElementById('annotated-result').src = data.annotated_image_url;
+
+        // Detection table
+        const tbody = document.getElementById('detections-body');
+        tbody.innerHTML = '';
+        data.detections.forEach((det, idx) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${idx + 1}</td>
+                <td>${det.class_name}</td>
+                <td>${det.class_code}</td>
+                <td>${(det.confidence * 100).toFixed(1)}%</td>
+                <td><span class="severity-badge severity-${det.severity.toLowerCase()}">${det.severity}</span></td>
+                <td>(${det.x1.toFixed(0)}, ${det.y1.toFixed(0)}) - (${det.x2.toFixed(0)}, ${det.y2.toFixed(0)})</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        if (data.total_detections === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No road damage detected in this image.</td></tr>';
+        }
+
+        document.getElementById('results').style.display = 'block';
+    }
+</script>
+{% endblock %}

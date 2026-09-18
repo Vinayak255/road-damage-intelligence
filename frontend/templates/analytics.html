@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}RDIS - Analytics{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Analytics Dashboard</h1>
+    <p class="subtitle">Statistics and charts generated from real detection data</p>
+</div>
+
+<div id="analytics-loading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading analytics...</p>
+</div>
+
+<div id="analytics-empty" class="empty-state-large" style="display:none;">
+    <div class="empty-icon">📊</div>
+    <h3>No Data Yet</h3>
+    <p>Analytics will be generated from real detection data after you perform image or video analyses.</p>
+    <a href="/image-analysis" class="btn btn-primary">Start First Analysis</a>
+</div>
+
+<div id="analytics-content" style="display:none;">
+    <div class="summary-cards" id="stats-cards"></div>
+
+    <div class="charts-grid">
+        <div class="chart-container" id="chart-damage-type"></div>
+        <div class="chart-container" id="chart-severity"></div>
+        <div class="chart-container" id="chart-confidence"></div>
+        <div class="chart-container" id="chart-detections"></div>
+        <div class="chart-container" id="chart-performance"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', loadAnalytics);
+
+    async function loadAnalytics() {
+        try {
+            const response = await fetch('/api/analytics');
+            const data = await response.json();
+
+            document.getElementById('analytics-loading').style.display = 'none';
+
+            if (data.total_sessions === 0) {
+                document.getElementById('analytics-empty').style.display = 'block';
+                return;
+            }
+
+            // Summary cards
+            document.getElementById('stats-cards').innerHTML = `
+                <div class="summary-card"><div class="summary-value">${data.total_sessions}</div><div class="summary-label">Total Analyses</div></div>
+                <div class="summary-card"><div class="summary-value">${data.total_detections}</div><div class="summary-label">Total Detections</div></div>
+                <div class="summary-card"><div class="summary-value">${(data.average_confidence * 100).toFixed(1)}%</div><div class="summary-label">Avg Confidence</div></div>
+                <div class="summary-card"><div class="summary-value">${data.average_fps.toFixed(1)}</div><div class="summary-label">Avg FPS</div></div>
+                <div class="summary-card"><div class="summary-value">${data.average_processing_time.toFixed(2)}s</div><div class="summary-label">Avg Processing Time</div></div>
+            `;
+
+            // Render charts
+            const charts = data.charts || {};
+            if (charts.damage_type) Plotly.newPlot('chart-damage-type', charts.damage_type.data, charts.damage_type.layout, {responsive: true});
+            if (charts.severity) Plotly.newPlot('chart-severity', charts.severity.data, charts.severity.layout, {responsive: true});
+            if (charts.confidence) Plotly.newPlot('chart-confidence', charts.confidence.data, charts.confidence.layout, {responsive: true});
+            if (charts.detections_per_session) Plotly.newPlot('chart-detections', charts.detections_per_session.data, charts.detections_per_session.layout, {responsive: true});
+            if (charts.performance) Plotly.newPlot('chart-performance', charts.performance.data, charts.performance.layout, {responsive: true});
+
+            document.getElementById('analytics-content').style.display = 'block';
+        } catch (err) {
+            document.getElementById('analytics-loading').innerHTML = '<p class="error-message">Failed to load analytics.</p>';
+            console.error('Analytics error:', err);
+        }
+    }
+</script>
+{% endblock %}

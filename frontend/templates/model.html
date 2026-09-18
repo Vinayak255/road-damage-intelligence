@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}RDIS - Model Status{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Model Status</h1>
+    <p class="subtitle">YOLO model configuration and status</p>
+</div>
+
+<div id="model-loading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading model status...</p>
+</div>
+
+<div id="model-content" style="display:none;">
+    <div class="model-status-card" id="model-card"></div>
+
+    <div class="config-section">
+        <h2>Class Mapping</h2>
+        <table class="data-table" id="class-table">
+            <thead><tr><th>Model Index</th><th>Class Code</th><th>Class Name</th></tr></thead>
+            <tbody id="class-body"></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', loadModelStatus);
+
+    async function loadModelStatus() {
+        try {
+            const response = await fetch('/api/model/status');
+            const data = await response.json();
+            document.getElementById('model-loading').style.display = 'none';
+
+            const card = document.getElementById('model-card');
+            const statusClass = data.model_loaded ? 'status-ok' : 'status-error';
+            const statusText = data.model_loaded ? 'Loaded' : 'Not Loaded';
+
+            card.innerHTML = `
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="summary-value"><span class="status-dot ${statusClass}"></span>${statusText}</div>
+                        <div class="summary-label">Model Status</div>
+                    </div>
+                    <div class="summary-card"><div class="summary-value">${data.device}</div><div class="summary-label">Device</div></div>
+                    <div class="summary-card"><div class="summary-value">${data.confidence_threshold}</div><div class="summary-label">Confidence Threshold</div></div>
+                    <div class="summary-card"><div class="summary-value">${data.iou_threshold}</div><div class="summary-label">IoU Threshold</div></div>
+                    <div class="summary-card"><div class="summary-value">${data.image_size}px</div><div class="summary-label">Image Size</div></div>
+                </div>
+                <div class="model-path"><strong>Model Path:</strong> ${data.model_path}</div>
+                ${!data.model_loaded ? '<div class="warning-banner">⚠️ Road-damage model not found. Place a trained model at <code>models/best.pt</code> or configure MODEL_PATH in .env.</div>' : ''}
+            `;
+
+            const tbody = document.getElementById('class-body');
+            tbody.innerHTML = '';
+            Object.entries(data.class_mapping).forEach(([idx, code]) => {
+                const name = data.class_names[code] || code;
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${idx}</td><td>${code}</td><td>${name}</td>`;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('model-content').style.display = 'block';
+        } catch (err) {
+            document.getElementById('model-loading').innerHTML = '<p class="error-message">Failed to load model status.</p>';
+        }
+    }
+</script>
+{% endblock %}

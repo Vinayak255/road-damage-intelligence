@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}RDIS - History{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Analysis History</h1>
+    <p class="subtitle">Previous analyses and detection records</p>
+</div>
+
+<div class="history-container">
+    <div id="sessions-list">
+        <h2>Analysis Sessions</h2>
+        <table class="data-table" id="sessions-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Filename</th>
+                    <th>Status</th>
+                    <th>Detections</th>
+                    <th>Processing Time</th>
+                    <th>FPS</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="sessions-body"></tbody>
+        </table>
+        <div id="sessions-empty" class="empty-state" style="display:none;">
+            No analyses have been performed yet. Go to <a href="/image-analysis">Image Analysis</a> to get started.
+        </div>
+    </div>
+
+    <div id="session-detail" style="display:none;">
+        <h2>Session Details</h2>
+        <button class="btn btn-secondary" onclick="hideDetail()">← Back to list</button>
+        <div id="detail-info" class="detail-info"></div>
+        <h3>Detections</h3>
+        <table class="data-table" id="detail-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Frame</th>
+                    <th>Timestamp</th>
+                    <th>Damage Type</th>
+                    <th>Confidence</th>
+                    <th>Severity</th>
+                    <th>Track ID</th>
+                    <th>Evidence</th>
+                </tr>
+            </thead>
+            <tbody id="detail-body"></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', loadSessions);
+
+    async function loadSessions() {
+        try {
+            const response = await fetch('/api/analyses');
+            const sessions = await response.json();
+            const tbody = document.getElementById('sessions-body');
+            tbody.innerHTML = '';
+
+            if (sessions.length === 0) {
+                document.getElementById('sessions-empty').style.display = 'block';
+                return;
+            }
+
+            sessions.forEach(s => {
+                const row = document.createElement('tr');
+                const date = s.started_at ? new Date(s.started_at).toLocaleString() : '-';
+                row.innerHTML = `
+                    <td>${s.id}</td>
+                    <td><span class="type-badge type-${s.source_type}">${s.source_type}</span></td>
+                    <td>${s.filename}</td>
+                    <td><span class="status-badge status-${s.status}">${s.status}</span></td>
+                    <td>${s.total_detections}</td>
+                    <td>${s.processing_time.toFixed(2)}s</td>
+                    <td>${s.average_fps.toFixed(1)}</td>
+                    <td>${date}</td>
+                    <td><button class="btn btn-sm" onclick="viewDetail(${s.id})">View</button></td>`;
+                tbody.appendChild(row);
+            });
+        } catch (err) {
+            console.error('Failed to load sessions:', err);
+        }
+    }
+
+    async function viewDetail(sessionId) {
+        try {
+            const response = await fetch(`/api/analyses/${sessionId}`);
+            const data = await response.json();
+            document.getElementById('sessions-list').style.display = 'none';
+            document.getElementById('session-detail').style.display = 'block';
+
+            const info = document.getElementById('detail-info');
+            const s = data.session;
+            info.innerHTML = `
+                <div class="summary-cards">
+                    <div class="summary-card"><div class="summary-value">${s.source_type}</div><div class="summary-label">Type</div></div>
+                    <div class="summary-card"><div class="summary-value">${s.filename}</div><div class="summary-label">File</div></div>
+                    <div class="summary-card"><div class="summary-value">${s.total_detections}</div><div class="summary-label">Detections</div></div>
+                    <div class="summary-card"><div class="summary-value">${s.processing_time.toFixed(2)}s</div><div class="summary-label">Time</div></div>
+                </div>`;
+
+            const tbody = document.getElementById('detail-body');
+            tbody.innerHTML = '';
+            data.detections.forEach((d, i) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${i + 1}</td><td>${d.frame_number}</td><td>${d.timestamp || '-'}</td>
+                    <td>${d.damage_name || d.damage_type}</td>
+                    <td>${(d.confidence * 100).toFixed(1)}%</td>
+                    <td><span class="severity-badge severity-${d.severity.toLowerCase()}">${d.severity}</span></td>
+                    <td>${d.track_id || '-'}</td>
+                    <td>${d.evidence_path ? '<a href="' + d.evidence_path + '" target="_blank">View</a>' : '-'}</td>`;
+                tbody.appendChild(row);
+            });
+
+            if (data.detections.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No detections in this session.</td></tr>';
+            }
+        } catch (err) {
+            console.error('Failed to load session detail:', err);
+        }
+    }
+
+    function hideDetail() {
+        document.getElementById('sessions-list').style.display = 'block';
+        document.getElementById('session-detail').style.display = 'none';
+    }
+</script>
+{% endblock %}

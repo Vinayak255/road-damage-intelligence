@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}RDIS - Home{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Road Damage Intelligence System</h1>
+    <p class="subtitle">Automated Road Damage Detection using Computer Vision</p>
+</div>
+
+<div class="hero-section">
+    <div class="hero-text">
+        <h2>Detect, Classify & Analyze Road Damage</h2>
+        <p>
+            This system uses YOLO object detection to automatically identify road damage
+            in images and videos. It detects four types of damage from the RDD2022 dataset:
+            <strong>Longitudinal Cracks (D00)</strong>, <strong>Transverse Cracks (D10)</strong>,
+            <strong>Alligator Cracks (D20)</strong>, and <strong>Potholes (D40)</strong>.
+        </p>
+        <div class="hero-actions">
+            <a href="/image-analysis" class="btn btn-primary">Analyze Image</a>
+            <a href="/video-analysis" class="btn btn-secondary">Analyze Video</a>
+        </div>
+    </div>
+</div>
+
+<div class="features-grid">
+    <div class="feature-card">
+        <div class="feature-icon">📸</div>
+        <h3>Image Analysis</h3>
+        <p>Upload road images for instant damage detection with bounding boxes, confidence scores, and severity estimation.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">🎥</div>
+        <h3>Video Analysis</h3>
+        <p>Process video footage frame-by-frame with object tracking to identify and deduplicate damage events.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Damage Classification</h3>
+        <p>Classifies damage into four RDD2022 categories: Longitudinal Crack, Transverse Crack, Alligator Crack, and Pothole.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">⚠️</div>
+        <h3>Severity Estimation</h3>
+        <p>Visual severity heuristic based on bounding-box area, damage type, and confidence. Low / Medium / High levels.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">🗄️</div>
+        <h3>Detection History</h3>
+        <p>All analysis sessions and detections are stored in a database for review and evidence retrieval.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Analytics Dashboard</h3>
+        <p>Charts and statistics generated from real detection data: damage distribution, severity, confidence, and performance.</p>
+    </div>
+</div>
+
+<div class="system-status-section">
+    <h2>System Status</h2>
+    <div id="system-status" class="status-grid">
+        <div class="status-item">
+            <span class="status-label">API</span>
+            <span class="status-badge" id="status-api">Checking...</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Model</span>
+            <span class="status-badge" id="status-model">Checking...</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Database</span>
+            <span class="status-badge" id="status-db">Checking...</span>
+        </div>
+    </div>
+</div>
+
+<div class="cv-pipeline-section">
+    <h2>Computer Vision Pipeline</h2>
+    <div class="pipeline-flow">
+        <div class="pipeline-step">Image/Video Input</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Preprocessing</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">YOLO Detection</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Classification</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Severity</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Evidence</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Database</div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step">Analytics</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        checkSystemStatus();
+    });
+</script>
+{% endblock %}

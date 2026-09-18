@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Road Damage Intelligence System - Automated road damage detection using Computer Vision and YOLO object detection.">
+    <title>{% block title %}Road Damage Intelligence System{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-icon">🛣️</span>
+            <span class="nav-title">RDIS</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="nav-link" id="nav-home">Home</a></li>
+            <li><a href="/image-analysis" class="nav-link" id="nav-image">Image Analysis</a></li>
+            <li><a href="/video-analysis" class="nav-link" id="nav-video">Video Analysis</a></li>
+            <li><a href="/history" class="nav-link" id="nav-history">History</a></li>
+            <li><a href="/analytics" class="nav-link" id="nav-analytics">Analytics</a></li>
+            <li><a href="/model" class="nav-link" id="nav-model">Model</a></li>
+            <li><a href="/evaluation" class="nav-link" id="nav-eval">Evaluation</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>Road Damage Intelligence System &copy; 2024 | Computer Vision Project | VITyarthi Build Your Own Project</p>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

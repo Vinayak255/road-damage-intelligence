@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Model weights (large files)
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.engine
+!models/.gitkeep
+
+# Dataset (do NOT commit full dataset)
+data/datasets/
+data/raw/
+
+# Generated outputs
+data/input/*
+!data/input/.gitkeep
+data/output/*
+!data/output/.gitkeep
+data/evidence/*
+!data/evidence/.gitkeep
+
+# Database
+*.db
+*.sqlite3
+
+# Reports (generated)
+reports/*.json
+reports/*.csv
+!reports/.gitkeep
+
+# Ultralytics runs
+runs/
+
+# Logs
+logs/
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# pytest
+.pytest_cache/
+htmlcov/
+.coverage
