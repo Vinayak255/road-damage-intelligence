@@ -56,7 +56,7 @@ The application is built with an inference-first architecture that separates con
 
 ```mermaid
 architecture-beta
-    group api(cloud)[FastAPI Backend]
+    service api(cloud)[FastAPI Backend]
     
     service frontend(server)[Jinja2 Frontend]
     service cv(server)[CV Pipeline (YOLOv8 & ByteTrack)]
@@ -75,13 +75,13 @@ architecture-beta
 
 ### 7.1 Use Case Diagram
 ```mermaid
-usecaseDiagram
-    actor User as "Civil Engineer / User"
+flowchart LR
+    User[Civil Engineer / User]
     
-    usecase U1 as "Upload Image/Video"
-    usecase U2 as "View Detection Results"
-    usecase U3 as "View Analytics Dashboard"
-    usecase U4 as "Review Saved Evidence"
+    U1([Upload Image/Video])
+    U2([View Detection Results])
+    U3([View Analytics Dashboard])
+    U4([Review Saved Evidence])
     
     User --> U1
     User --> U2
