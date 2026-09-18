@@ -145,10 +145,12 @@ road-damage-intelligence/
 ```
 
 ## 📸 Screenshots
+   <img width="1332" height="958" alt="Screenshot 2026-09-18 114716" src="https://github.com/user-attachments/assets/abf8a302-ed42-4053-a6b3-782fc07d9aca" />
+  <img width="1315" height="898" alt="Screenshot 2026-09-18 114728" src="https://github.com/user-attachments/assets/16560bb8-f625-4e36-ab00-b6a43d042c2a" />
+  <img width="1307" height="473" alt="Screenshot 2026-09-18 114735" src="https://github.com/user-attachments/assets/cf955e9f-fdca-4f2b-8298-e4b8280556cf" />
 
-![alt text](image-3.png)
-![alt text](image-4.png)
-![alt text](image-5.png)
+
+
 
 
 ##Demo Video
