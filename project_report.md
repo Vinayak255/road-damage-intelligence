@@ -63,10 +63,10 @@ architecture-beta
     service db(database)[SQLite DB]
     service disk(disk)[Evidence Storage]
 
-    frontend:R --> api:L
-    api:R --> cv:L
-    api:B --> db:T
-    api:B --> disk:T
+    frontend:R -- L:api
+    api:R -- L:cv
+    api:B -- T:db
+    api:B -- T:disk
 ```
 
 ---
