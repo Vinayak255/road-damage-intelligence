@@ -153,7 +153,8 @@ road-damage-intelligence/
 
 
 
-##Demo Video
-https://drive.google.com/file/d/1_L_tG02_7kU-PJoV77IHhP0GEGp57yOJ/view?usp=sharing
+## Demo Video
+[Watch Demo Video Here](https://drive.google.com/file/d/1_L_tG02_7kU-PJoV77IHhP0GEGp57yOJ/view?usp=sharing)
+
 NAME: Vinayak Bhadauria
-Reg No.:24BAI10240
+Reg No.: 24BAI10240
