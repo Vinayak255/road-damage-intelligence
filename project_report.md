@@ -206,7 +206,10 @@ Videos are processed frame-by-frame using `cv2.VideoCapture`. To maintain perfor
 ![alt text](image.png)
 ![alt text](image-1.png)
 
-## 11. Testing Approach
+## 11. Demo Video
+   https://drive.google.com/file/d/1_L_tG02_7kU-PJoV77IHhP0GEGp57yOJ/view?usp=sharing
+
+## 12. Testing Approach
 
 The project includes a comprehensive, automated test suite utilizing `pytest` with 81 passing tests. The testing strategy covers:
 - **Unit Tests**: Validating preprocessing functions, severity engine logic, and tracking mechanisms.
@@ -215,7 +218,7 @@ The project includes a comprehensive, automated test suite utilizing `pytest` wi
 
 ---
 
-## 12. Challenges Faced
+## 13. Challenges Faced
 
 1. **Duplicate Detections in Video**: Initially, running object detection on video frames resulted in the same pothole being logged hundreds of times. This was resolved by integrating ByteTrack to deduplicate IDs across frames.
 2. **Database Bloat**: Saving an image for every single detection frame filled up the hard drive instantly. We solved this by implementing an "Evidence Cooldown" that only saves one crop of a specific tracked damage every 30 frames.
@@ -223,7 +226,7 @@ The project includes a comprehensive, automated test suite utilizing `pytest` wi
 
 ---
 
-## 13. Learnings & Key Takeaways
+## 14. Learnings & Key Takeaways
 
 1. **System Integration**: Building an AI project is much more than just training a model; abstracting the model behind a robust API and ensuring smooth data flow is where the majority of engineering effort goes.
 2. **Heuristic Engineering**: Learning to create transparent, non-ML heuristics (like the visual severity engine) to complement deep learning outputs is crucial for building complete products.
@@ -231,7 +234,7 @@ The project includes a comprehensive, automated test suite utilizing `pytest` wi
 
 ---
 
-## 14. Future Enhancements
+## 15. Future Enhancements
 
 - **Depth Estimation Integration**: Utilizing stereo cameras or LiDAR to calculate exact physical dimensions for highly accurate severity scoring.
 - **Mobile Edge Deployment**: Exporting the model to ONNX/TFLite for deployment directly on mobile devices mounted on municipal vehicles.
@@ -239,7 +242,7 @@ The project includes a comprehensive, automated test suite utilizing `pytest` wi
 
 ---
 
-## 15. References
+## 16. References
 
 1. Arya, D., et al. (2022). *Global Road Damage Detection: State-of-the-art Solutions*. RDD2022 Challenge.
 2. Ultralytics. (2023). *YOLOv8 Documentation*. https://docs.ultralytics.com
