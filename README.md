@@ -142,7 +142,7 @@ road-damage-intelligence/
 └── requirements.txt      # Python dependencies
 ```
 
-```
+
 
 ## 📸 Screenshots
 <img width="1332" height="958" alt="Screenshot 2026-09-18 114716" src="https://github.com/user-attachments/assets/abf8a302-ed42-4053-a6b3-782fc07d9aca" />
